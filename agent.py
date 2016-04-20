@@ -10,9 +10,10 @@ class LearningAgent(Agent):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
+
         # TODO: Initialize any additional variables here
-	# Initialize all states to a large number to encourage the learning agent to discover the rewards for them
-	self.qmatrix = [[10 for x in range(4)] for y in range(128)]
+	# Initialize all states to a positive number > 2 to encourage the learning agent to discover the rewards for them
+	self.qmatrix = [[3 for x in range(4)] for y in range(128)]
 	self.current_state = 0
 
     def reset(self, destination=None):
@@ -42,19 +43,12 @@ class LearningAgent(Agent):
 
     def update_qmatrix(self, reward, prev_waypoint, inputs, action):
     	"""Update the Q-matrix based on assigned reward"""
-	alpha       = 0.4
+	alpha       = 0.6
 	prev_state  = self.conv_state_decimal(prev_waypoint, inputs)
 	prev_action = self.conv_action_decimal(action)
 
-	# Disregard the reward of 12 given on reaching the destination
-	# Use the negative rewards to learn (and avoid) traffic violations 
-	# Use the smaller positive rewards to learn to follow the planner route
-	if (reward < 3):
-		if (self.qmatrix[prev_state][prev_action] < 10):	# Consecutive updates increment the state value
-			self.qmatrix[prev_state][prev_action] = ((1 - alpha)* self.qmatrix[prev_state][prev_action]) + (alpha * reward)
-		else:	# First execution of the state sets the state value 
-			self.qmatrix[prev_state][prev_action] = alpha * reward
-
+	# Update the Q Matrix
+	self.qmatrix[prev_state][prev_action] = ((1 - alpha)* self.qmatrix[prev_state][prev_action]) + (alpha * reward)
 	print "Updated Q Matrix for State: %s Q-Values: %s" % (prev_state, self.qmatrix[prev_state])
 
     def learnt_action(self, inputs):
