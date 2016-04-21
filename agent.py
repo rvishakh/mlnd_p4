@@ -88,10 +88,9 @@ class LearningAgent(Agent):
 	print "Current State: %s" % (current_state)
 
         # TODO: Update state
-	self.state = self.get_state()
+	self.state = current_state
         
         # TODO: Select action according to your policy
-        #action = self.random_action()
         action = self.learnt_action(inputs)
 
         # Execute action and get reward
